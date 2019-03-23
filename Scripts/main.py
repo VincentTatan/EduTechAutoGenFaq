@@ -1,23 +1,39 @@
-from piazza_api import Piazza
+import pandas as pd
+import praw
+import datetime as dt
+import config
 
-p = Piazza()
-p.user_login()
-user_profile = p.get_user_profile()
-eece210 = p.network("hl5qm84dl4t3x2")
-eece210.get_post(10)
-posts = eece210.iter_all_posts(limit=10)
-print (posts)
-for post in posts:
-    print (post)
+reddit = praw.Reddit(client_id = config.client_id,
+                     client_secret= config.client_secret,
+                    username=config.username,
+                    password=config.password,
+                     user_agent=config.user_agent
+                     )
+subreddit=reddit.subreddit('OMSCS')
+top_subreddit= subreddit.top(limit=500)
+topics_dict = { "title":[], \
+                "score":[], \
+                "id":[], "url":[], \
+                "comms_num": [], \
+                "created": [], \
+                "body":[]}
+for submission in top_subreddit:
+    topics_dict["title"].append(submission.title)
+    topics_dict["score"].append(submission.score)
+    topics_dict["id"].append(submission.id)
+    topics_dict["url"].append(submission.url)
+    topics_dict["comms_num"].append(submission.num_comments)
+    topics_dict["created"].append(submission.created)
+    topics_dict["body"].append(submission.selftext)
 
-all_users = eece210.get_all_users()
-print (all_users[0])
 
-#
-# piazza = Piazza()
-# piazza.user_login('vtatan3@gatech.edu', 'Visa123456!')
-# course = piazza.network('ipgo72nw7yu1jv')
-#
-# # rpc api to post notes
-# piazza_rpc = PiazzaRPC('j0a1bog7vzu2cj')
-# piazza_rpc.user_login(config.creds['email'], config.creds['password'])
+topics_data = pd.DataFrame(topics_dict)
+
+
+#Fix the date column
+def get_date(created):
+    return dt.datetime.fromtimestamp(created)
+_timestamp = topics_data["created"].apply(get_date)
+topics_data = topics_data.assign(timestamp = _timestamp)
+
+topics_data.to_csv('topics.csv', index=False)
