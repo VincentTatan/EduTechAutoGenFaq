@@ -5,6 +5,7 @@ import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
 from machine_learning import topic_extraction,create_dict_list_of_topics
+import time
 
 global final_reddit_topic_df
 global top_post_df
@@ -21,40 +22,44 @@ dict_topics = create_dict_list_of_topics(final_reddit_topic_df)
 
 
 
+
 app.layout = html.Div([
     html.H1('Auto Generated FAQ'),
     html.H3('Drop down'),
     dcc.Dropdown(
         id='my-dropdown',
         options=dict_topics,
-        multi=True
+        multi=True,
+        value=dict_topics
     ),
-    dcc.Graph(id='top_topics',
-              figure={
-                  'data':[go.Bar(
-                    y= final_reddit_topic_df.dominanttopic.value_counts().index,
-                    x= final_reddit_topic_df.dominanttopic.value_counts().values,
-                    orientation='h'
-                    )],
-                  'layout':{
-                      'title':'Top topics from forum'
-                  }
-              }),
+    dcc.Graph(id='top_topics'),
     html.H2('FAQ'),
     html.Table(id= 'my-table')
 ])
 
+
+# For the top topics graph
+@app.callback(Output('top_topics', 'figure'), [Input('my-dropdown', 'value')])
+def update_graph(selected_dropdown_value):
+    top_topic_filtered_df = top_post_df.copy()
+    top_topic_filtered_df = top_post_filtered(top_topic_filtered_df, selected_dropdown_value)
+
+    figure = {
+        'data': [go.Bar(
+            y=top_topic_filtered_df.dominant_topic_text.value_counts().index,
+            x=top_topic_filtered_df.dominant_topic_text.value_counts().values,
+            orientation='h'
+        )],
+        'layout': {
+            'title': 'Top topics from forum'
+        }
+    }
+    return figure
+
 @app.callback(Output('my-table', 'children'), [Input('my-dropdown', 'value')])
 def generate_table(selected_dropdown_value,max_rows=10):
-
-    print(selected_dropdown_value)
-    #filtering
     top_post_filtered_df= top_post_df.copy()
-    top_post_filtered_df['dominant_topic_text']= top_post_df['dominanttopic'].apply(convertTuple)
-    top_post_filtered_df= top_post_filtered_df[(top_post_filtered_df['dominant_topic_text'].isin(selected_dropdown_value))]
-    top_post_filtered_df = top_post_filtered_df.drop(columns=['dominanttopic'])
-    print(top_post_filtered_df)
-
+    top_post_filtered_df= top_post_filtered(top_post_filtered_df,selected_dropdown_value)
     return [html.Tr([html.Th(col) for col in top_post_filtered_df.columns])] + [html.Tr([
         html.Td(html.A('click',href=top_post_filtered_df.iloc[i][col])) if col =='url' else html.Td(top_post_filtered_df.iloc[i][col]) for col in top_post_filtered_df.columns
     ]) for i in range(min(len(top_post_filtered_df), max_rows))]
@@ -62,6 +67,15 @@ def generate_table(selected_dropdown_value,max_rows=10):
 def convertTuple(tup):
     str =  ','.join(tup)
     return str
+
+def top_post_filtered(top_post_filtered_df,selected_dropdown_value):
+    if selected_dropdown_value is None:
+        selected_dropdown_value = []
+    top_post_filtered_df['dominant_topic_text'] = top_post_df['dominanttopic'].apply(convertTuple)
+    top_post_filtered_df = top_post_filtered_df[
+        (top_post_filtered_df['dominant_topic_text'].isin(selected_dropdown_value))]
+    top_post_filtered_df = top_post_filtered_df.drop(columns=['dominanttopic'])
+    return top_post_filtered_df
 
 if __name__ == '__main__':
     app.run_server(debug=True)
