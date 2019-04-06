@@ -54,5 +54,4 @@ def create_dict_list_of_topics(df):
     for dominanttopic in unique_list:
         dominant_topic_string = ",".join(dominanttopic)
         dictlist.append({'value': dominant_topic_string, 'label': dominant_topic_string})
-    print(dictlist)
     return dictlist
