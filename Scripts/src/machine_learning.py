@@ -46,3 +46,13 @@ def topic_extraction(df):
     df['dominanttopic'] = topic_series
 
     return df
+
+def create_dict_list_of_topics(df):
+    # Create a list of dict based on tickers and labels
+    dictlist = []
+    unique_list = df.dominanttopic.unique()
+    for dominanttopic in unique_list:
+        dominant_topic_string = ",".join(dominanttopic)
+        dictlist.append({'value': dominant_topic_string, 'label': dominant_topic_string})
+    print(dictlist)
+    return dictlist
