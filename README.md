@@ -10,7 +10,7 @@ NLP and topic depictions for forum data. This is done to improve the Piazza Foru
 
 ## Getting Started
 
-Clone this repository to your local.
+Clone this repository to your local.g
 Run the dash_main.py. This will run a Flask App Server (lazy loading) to your local
 Go to the port specified (default is 8050)
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.

@@ -1,5 +1,4 @@
 import dash
-import dash_table
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
@@ -18,7 +17,7 @@ reddit_post_df = pd.read_csv('resource/topics.csv')
 sorted_reddit_post_df = reddit_post_df.sort_values(by=['comms_num'],ascending=False)
 final_reddit_post_df = sorted_reddit_post_df.head(5)
 final_reddit_topic_df = topic_extraction(sorted_reddit_post_df)
-top_post_df = final_reddit_topic_df[['title','score','dominanttopic']].sort_values(by=['score'], ascending=False)
+top_post_df = final_reddit_topic_df[['title','score','url','dominanttopic']].sort_values(by=['score'], ascending=False)
 # top_post_df = top_post_df.assign(rank=[ 1+i for i in range(len(top_post_df))])[['rank'] + top_post_df.columns.tolist()]
 dict_topics = create_dict_list_of_topics(final_reddit_topic_df)
 
@@ -33,7 +32,7 @@ def dict_topic_list(dict_list):
 
 app.layout = html.Div([
     html.H1('Auto Generated FAQ'),
-    html.H4('Select Topics'),
+    html.H3('Select Topics'),
     dcc.Dropdown(
         id='my-dropdown',
         options=dict_topics,
@@ -45,7 +44,8 @@ app.layout = html.Div([
         id='top_topics'
     ),
     html.H1('FAQ This Week'),
-    html.Table(id='my-table')
+    html.Table(id= 'my-table')
+
 ])
 
 
@@ -94,7 +94,6 @@ def top_post_filtered(top_post_filtered_df,selected_dropdown_value):
         (top_post_filtered_df['dominant_topic_text'].isin(selected_dropdown_value))]
     top_post_filtered_df = top_post_filtered_df.drop(columns=['dominanttopic'])
     return top_post_filtered_df
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
