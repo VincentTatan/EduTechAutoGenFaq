@@ -10,8 +10,6 @@ backports.functools-lru-cache==1.3
 backports.ssl-match-hostname==3.4.0.2
 bcdoc==0.12.2
 bcrypt==3.1.1
-beautifulsoup==3.2.1
-beautifulsoup4==4.5.1
 dash==0.17.7
 dash-core-components==0.5.1
 dash-html-components==0.6.2
