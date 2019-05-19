@@ -33,7 +33,7 @@ reddit = praw.Reddit(client_id = config.client_id,
                     password=config.password,
                      user_agent=config.user_agent
                      )
-subreddit=reddit.subreddit('OMSCS')
+subreddit = reddit.subreddit('OMSCS')
 hot_python = subreddit.hot(limit=500)
 
 for submission in hot_python:
